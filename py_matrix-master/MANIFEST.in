@@ -1,0 +1,6 @@
+include README.md
+include README.rst
+include examples/*.ipynb
+include examples/*.txt
+include images/*.png
+include materials/*.edb
