@@ -342,15 +342,18 @@ class ParameterInitialization(object):  # class继承object类
             legendLabel = []
             halfFullWidth = []
             maximumSlopeRate = []
+
             xylabel = ["Angle(Degree)","Intensity","SPR Curve"]
 
             #新方法：多层结构
             self.multilayerStructureMethod.numberOfLayers = 6
             self.multilayerStructureMethod.metalThickness = 50
             self.multilayerStructureMethod.metalRefractiveIndex = self.AuMetalRefractiveIndex
-            intensity_1_y, intensity_1_x = self.Result(self.multilayerStructureMethod)
+            intensity_1_y, intensity_1_x,dep = self.Result(self.multilayerStructureMethod)
             halfFullWidth.append(self.HalfFullWidth(intensity_1_x, intensity_1_y))
             maximumSlopeRate.append(self.MaximumSlopeRate(intensity_1_x, intensity_1_y))
+            SI = self.SensitivityIntensity(maximumSlopeRate[0][1])
+            print("灵敏度值SI:"+str(SI))
             legendLabel.append("Multilayer Au:%snm"%str(self.metalThickness))
 
             print("maximumSlopeRate:\n")
@@ -361,6 +364,8 @@ class ParameterInitialization(object):  # class继承object类
                 #print(i)
             #intensity_1_y, intensity_2_y= self.NormlizedArray(intensity_1_y, intensity_2_y)
             self.PlotGraphs(xylabel, legendLabel, intensity_1_x, intensity_1_y)
+            xylabelfordep = ["Angle(Degree)","Detection depth","Detection Curve"]
+            self.PlotGraphDep(xylabelfordep,intensity_1_x,dep)
         else:
             print("else")
 
@@ -373,8 +378,7 @@ class ParameterInitialization(object):  # class继承object类
             for i in array:
                 y = np.array(i)
                 array1.append(y)
-                #print(y)
-                #print(array1)
+
             #把所有的计算曲线信息都加入到同一个坐标轴里面
             for i in range(len(array1)):
                 j = i+1
@@ -388,6 +392,17 @@ class ParameterInitialization(object):  # class继承object类
             plot.ylabel(xylabel[1])#默认为"Angle(Degree)"
             plot.title(xylabel[2])#默认为"SPR Curve"
             plot.show()
+
+    def PlotGraphDep(self,label,x,y):
+                plot.plot(x,y)
+                plot.xlabel(label[0])  # 默认为"Intensity"
+                plot.ylabel(label[1])  # 默认为"Angle(Degree)"
+                plot.title(label[2])  # 默认为"SPR Curve"
+                plot.show()
+
+
+
+
     #选取的半峰宽的基底为0-1，所以表示为0.5附近，但是得出Y-0.5<=0.01
     def HalfFullWidth(self,array_x,array_y):
         first = []
@@ -425,20 +440,22 @@ class ParameterInitialization(object):  # class继承object类
     def Result(self,classVariable):
         x = []
         intensity = []
+        dep = []
         for i in np.arange(55, 80, 0.05):
             #入射角转化为弧度
             #classVariable.incidentAngle = i
             classVariable.incidentAngle = i * mpmath.pi / 180
             #计算模型的折射率信息
-            result = classVariable.ReflectedLightIntensity()
+            result,depResult = classVariable.ReflectedLightIntensity()
             #返回的信息不能是Nan，否则一整个数组都是Nan
             if math.isnan(result):
                 continue
             intensity.append(result)
             x.append(i)
+            dep.append(depResult)
         #归一化处理
         #intensity = self.NormlizedArray(intensity) 暂时不做归一化，目的就是把所有的内容合在一起归一化
-        return intensity, x
+        return intensity, x,dep
 
     def NormlizedArray(self, *intensity):
         minVal = 100000

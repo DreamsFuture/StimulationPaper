@@ -52,8 +52,8 @@ class MultilayerStructureMethod(object):
         #for i in range(len(self.reflectedLight)):
             #self.reflectedLight[i] = mpmath.fabs(self.reflectedLight[i])**2
             #print("self.reflectedLight[%s] = %s"%(i,self.reflectedLight[i]))
-
-        return R ** 2
+        dep =  mpmath.fabs(self.DetectionDepth(self.numberOfLayers))
+        return R ** 2,dep
 
     def StructuralReflectionCoefficient(self, N):
         for i in range(N-1,-1,-1):
